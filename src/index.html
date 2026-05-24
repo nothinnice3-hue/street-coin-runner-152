@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <title>Street Coin Runner 152</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Main Menu -->
+    <section id="screen-menu" class="screen active">
+      <div class="menu-card">
+        <h1 class="title">Street Coin Runner <span class="title-num">152</span></h1>
+        <p class="subtitle">An arcade endless runner</p>
+        <div class="best-row">
+          <div class="best-pill">Best Score: <span id="menu-best-score">0</span></div>
+          <div class="best-pill">Total Coins: <span id="menu-total-coins">0</span></div>
+        </div>
+        <div class="menu-buttons">
+          <button class="btn primary" id="btn-play">Play</button>
+          <button class="btn" id="btn-how">How to Play</button>
+          <button class="btn" id="btn-settings">Settings</button>
+          <button class="btn danger" id="btn-quit">Quit</button>
+        </div>
+        <p class="footer-hint">Built with Electron - HTML5 Canvas</p>
+      </div>
+    </section>
+
+    <!-- How To Play -->
+    <section id="screen-how" class="screen">
+      <div class="menu-card">
+        <h2>How to Play</h2>
+        <ul class="how-list">
+          <li><b>A / Left Arrow</b> - move left</li>
+          <li><b>D / Right Arrow</b> - move right</li>
+          <li><b>Space / W / Up Arrow</b> - jump</li>
+          <li><b>P / Esc</b> - pause</li>
+          <li>Collect <span class="coin-text">coins</span> for points and totals</li>
+          <li>Dodge <span class="bad-text">cars, cones, trash cans, roadblocks</span></li>
+          <li>Survive as long as you can - speed increases over time</li>
+        </ul>
+        <button class="btn" id="btn-how-back">Back</button>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="screen-settings" class="screen">
+      <div class="menu-card">
+        <h2>Settings</h2>
+        <div class="setting-row">
+          <label>Music</label>
+          <button class="toggle" id="toggle-music" data-on="true">On</button>
+        </div>
+        <div class="setting-row">
+          <label>Sound Effects</label>
+          <button class="toggle" id="toggle-sfx" data-on="true">On</button>
+        </div>
+        <div class="setting-row">
+          <label>Difficulty</label>
+          <div class="diff-buttons">
+            <button class="diff-btn" data-diff="easy">Easy</button>
+            <button class="diff-btn active" data-diff="normal">Normal</button>
+            <button class="diff-btn" data-diff="hard">Hard</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Reset Save Data</label>
+          <button class="btn small danger" id="btn-reset-save">Reset</button>
+        </div>
+        <button class="btn" id="btn-settings-back">Back</button>
+      </div>
+    </section>
+
+    <!-- Game -->
+    <section id="screen-game" class="screen">
+      <div class="hud">
+        <div class="hud-left">
+          <div class="hud-item">Score: <span id="hud-score">0</span></div>
+          <div class="hud-item">Coins: <span id="hud-coins">0</span></div>
+        </div>
+        <div class="hud-right">
+          <div class="hud-item small">Best: <span id="hud-best">0</span></div>
+          <button class="btn small" id="btn-pause">Pause</button>
+        </div>
+      </div>
+      <canvas id="game-canvas" width="1280" height="720"></canvas>
+
+      <!-- Pause overlay -->
+      <div class="overlay" id="overlay-pause">
+        <div class="overlay-card">
+          <h2>Paused</h2>
+          <button class="btn primary" id="btn-resume">Resume</button>
+          <button class="btn" id="btn-pause-menu">Main Menu</button>
+        </div>
+      </div>
+
+      <!-- Game Over overlay -->
+      <div class="overlay" id="overlay-gameover">
+        <div class="overlay-card">
+          <h2>Game Over</h2>
+          <div class="result-row">Score: <span id="result-score">0</span></div>
+          <div class="result-row">Coins: <span id="result-coins">0</span></div>
+          <div class="result-row best-row-result" id="result-newbest" hidden>New Best!</div>
+          <button class="btn primary" id="btn-restart">Restart</button>
+          <button class="btn" id="btn-game-menu">Main Menu</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
