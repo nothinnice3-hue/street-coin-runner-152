@@ -295,6 +295,85 @@ html, body {
   image-rendering: pixelated;
 }
 
+/* How-to-Play extras */
+.how-section {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd84a;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.how-list li b {
+  min-width: 200px;
+}
+
+.how-note {
+  font-size: 14px;
+  color: #cfd5f0;
+  margin: 14px 0;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Touch controls (hidden by default, shown on touch devices) */
+#touch-controls {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  display: none;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+body.touch-active #touch-controls {
+  display: flex;
+}
+
+.tbtn {
+  appearance: none;
+  pointer-events: auto;
+  border: 3px solid rgba(255, 255, 255, 0.55);
+  background: rgba(20, 24, 40, 0.55);
+  color: #fff;
+  font-size: 36px;
+  font-weight: 700;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+
+.tbtn:active {
+  transform: scale(0.92);
+  background: rgba(255, 216, 74, 0.35);
+  border-color: #ffd84a;
+}
+
+.tbtn-jump {
+  background: rgba(255, 158, 50, 0.55);
+  border-color: rgba(255, 216, 74, 0.85);
+  width: 120px;
+  height: 120px;
+  font-size: 42px;
+  color: #fff7d0;
+}
+
 /* Overlays */
 .overlay {
   position: absolute;

@@ -31,15 +31,32 @@
     <section id="screen-how" class="screen">
       <div class="menu-card">
         <h2>How to Play</h2>
+        <div class="how-section">Keyboard</div>
         <ul class="how-list">
           <li><b>A / Left Arrow</b> - move left</li>
           <li><b>D / Right Arrow</b> - move right</li>
-          <li><b>Space / W / Up Arrow</b> - jump</li>
+          <li><b>Space / W / Up</b> - jump</li>
           <li><b>P / Esc</b> - pause</li>
-          <li>Collect <span class="coin-text">coins</span> for points and totals</li>
-          <li>Dodge <span class="bad-text">cars, cones, trash cans, roadblocks</span></li>
-          <li>Survive as long as you can - speed increases over time</li>
         </ul>
+        <div class="how-section">Controller</div>
+        <ul class="how-list">
+          <li><b>D-pad / Left Stick</b> - move left or right</li>
+          <li><b>A button</b> - jump</li>
+          <li><b>Start</b> - pause / resume</li>
+          <li><b>B button</b> - back (menus)</li>
+        </ul>
+        <div class="how-section">Touch</div>
+        <ul class="how-list">
+          <li><b>On-screen arrows</b> - move left or right</li>
+          <li><b>Jump button or swipe up</b> - jump</li>
+          <li><b>Tap canvas</b> - jump</li>
+          <li><b>Swipe left / right</b> - change lane</li>
+        </ul>
+        <p class="how-note">
+          Collect <span class="coin-text">coins</span> - dodge
+          <span class="bad-text">cars, cones, trash cans, roadblocks</span> -
+          speed keeps increasing.
+        </p>
         <button class="btn" id="btn-how-back">Back</button>
       </div>
     </section>
@@ -85,6 +102,13 @@
         </div>
       </div>
       <canvas id="game-canvas" width="1280" height="720"></canvas>
+
+      <!-- Touch controls (auto-shown on touch devices or first touch input) -->
+      <div id="touch-controls" aria-hidden="true">
+        <button id="touch-left" class="tbtn tbtn-left" type="button" aria-label="Move left">&#9664;</button>
+        <button id="touch-jump" class="tbtn tbtn-jump" type="button" aria-label="Jump">&#9650;</button>
+        <button id="touch-right" class="tbtn tbtn-right" type="button" aria-label="Move right">&#9654;</button>
+      </div>
 
       <!-- Pause overlay -->
       <div class="overlay" id="overlay-pause">

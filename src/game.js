@@ -320,6 +320,205 @@ window.addEventListener('keyup', (e) => {
   }
 });
 
+// ---------- Gamepad ----------
+// Standard mapping:
+//   buttons: 0=A, 1=B, 2=X, 3=Y, 4=LB, 5=RB, 6=LT, 7=RT,
+//            8=Back, 9=Start, 10=LS, 11=RS, 12=Up, 13=Down, 14=Left, 15=Right
+//   axes:    0=LSX, 1=LSY, 2=RSX, 3=RSY
+const Gamepad = (() => {
+  const prev = { btns: [], axisLeft: false, axisRight: false };
+  let connected = false;
+
+  window.addEventListener('gamepadconnected', (e) => {
+    connected = true;
+    console.log('Gamepad connected:', e.gamepad.id);
+  });
+  window.addEventListener('gamepaddisconnected', () => {
+    connected = false;
+  });
+
+  function readPad() {
+    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    for (const p of pads) {
+      if (p && p.connected) return p;
+    }
+    return null;
+  }
+
+  function pressed(pad, idx) {
+    const b = pad.buttons[idx];
+    return b ? (typeof b === 'object' ? b.pressed : b > 0.5) : false;
+  }
+
+  function tick() {
+    const pad = readPad();
+    if (!pad) return;
+
+    const gameActive = screens.game.classList.contains('active');
+    const onMenu = !gameActive;
+
+    // Edge detection helper
+    const downNow = (idx) => pressed(pad, idx);
+    const downPrev = (idx) => !!prev.btns[idx];
+    const justPressed = (idx) => downNow(idx) && !downPrev(idx);
+
+    // Stick → directional edges
+    const axL = pad.axes[0] || 0;
+    const axLNow = axL < -0.5;
+    const axRNow = axL > 0.5;
+    const axLEdge = axLNow && !prev.axisLeft;
+    const axREdge = axRNow && !prev.axisRight;
+
+    // Vertical for menu nav
+    const axV = pad.axes[1] || 0;
+    const upNow = downNow(12) || axV < -0.5;
+    const downNowV = downNow(13) || axV > 0.5;
+    const upEdge = upNow && !prev._upHeld;
+    const downEdge = downNowV && !prev._downHeld;
+
+    if (gameActive && !document.getElementById('overlay-pause').classList.contains('active')
+                   && !document.getElementById('overlay-gameover').classList.contains('active')) {
+      // Lane changes
+      if (justPressed(14) || axLEdge) Input.left = true;
+      if (justPressed(15) || axREdge) Input.right = true;
+      // Jump: A button or up D-pad
+      if (justPressed(0) || (upEdge && !axV)) Input.jumpQueued = true;
+      // Start = pause
+      if (justPressed(9)) Game.togglePause();
+    } else {
+      // Menu / overlay navigation
+      if (justPressed(9) && gameActive) {
+        // Start during overlays - resume or restart
+        const pauseOv = document.getElementById('overlay-pause');
+        const overOv = document.getElementById('overlay-gameover');
+        if (pauseOv.classList.contains('active')) Game.togglePause();
+        else if (overOv.classList.contains('active')) Game.restart();
+      } else {
+        if (upEdge) moveMenuFocus(-1);
+        if (downEdge) moveMenuFocus(1);
+        if (justPressed(0)) activateFocusedMenuButton();
+        if (justPressed(1)) goBackInMenu();
+      }
+    }
+
+    // Save state
+    prev.btns = pad.buttons.map(b => (typeof b === 'object' ? b.pressed : b > 0.5));
+    prev.axisLeft = axLNow;
+    prev.axisRight = axRNow;
+    prev._upHeld = upNow;
+    prev._downHeld = downNowV;
+  }
+
+  function isConnected() { return connected; }
+
+  return { tick, isConnected };
+})();
+
+function getActiveScreenButtons() {
+  const active = document.querySelector('.screen.active');
+  if (!active) return [];
+  // Include any visible overlay buttons too
+  const overlay = active.querySelector('.overlay.active');
+  const root = overlay || active;
+  return Array.from(root.querySelectorAll('button')).filter(b => {
+    return !b.disabled && b.offsetParent !== null;
+  });
+}
+
+function moveMenuFocus(dir) {
+  const buttons = getActiveScreenButtons();
+  if (!buttons.length) return;
+  const current = document.activeElement;
+  let idx = buttons.indexOf(current);
+  if (idx === -1) idx = 0;
+  else idx = (idx + dir + buttons.length) % buttons.length;
+  buttons[idx].focus();
+}
+
+function activateFocusedMenuButton() {
+  let target = document.activeElement;
+  const buttons = getActiveScreenButtons();
+  if (!buttons.includes(target)) target = buttons[0];
+  if (target) target.click();
+}
+
+function goBackInMenu() {
+  // Try to find a "Back" or "Menu" button
+  const buttons = getActiveScreenButtons();
+  const back = buttons.find(b =>
+    /back|menu|resume/i.test(b.textContent.trim())
+  );
+  if (back) back.click();
+}
+
+// ---------- Touch ----------
+const Touch = (() => {
+  let used = false;
+  let startX = 0, startY = 0, startTime = 0;
+  const SWIPE_MIN = 40;        // px
+  const TAP_MAX_MS = 250;
+  const TAP_MAX_DIST = 20;
+
+  function showOnScreenControls() {
+    if (used) return;
+    used = true;
+    document.body.classList.add('touch-active');
+  }
+
+  // Swipe detection on the canvas only (so menu buttons handle their own taps)
+  canvas.addEventListener('touchstart', (e) => {
+    showOnScreenControls();
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    startTime = performance.now();
+    e.preventDefault();
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', (e) => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    const dt = performance.now() - startTime;
+    const absX = Math.abs(dx), absY = Math.abs(dy);
+
+    if (absX < TAP_MAX_DIST && absY < TAP_MAX_DIST && dt < TAP_MAX_MS) {
+      // Tap = jump
+      Input.jumpQueued = true;
+    } else if (absX > absY && absX > SWIPE_MIN) {
+      if (dx > 0) Input.right = true;
+      else Input.left = true;
+    } else if (absY > absX && absY > SWIPE_MIN) {
+      if (dy < 0) Input.jumpQueued = true; // swipe up = jump
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  // On-screen buttons (also work with mouse so they're testable on desktop)
+  function wireBtn(id, action) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const fire = (e) => {
+      e.preventDefault();
+      showOnScreenControls();
+      action();
+    };
+    el.addEventListener('touchstart', fire, { passive: false });
+    el.addEventListener('mousedown', fire);
+  }
+
+  wireBtn('touch-left', () => { Input.left = true; });
+  wireBtn('touch-right', () => { Input.right = true; });
+  wireBtn('touch-jump', () => { Input.jumpQueued = true; });
+
+  // Detect touch capability at boot - if device looks touch-capable, show buttons proactively
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    showOnScreenControls();
+  }
+
+  return { showOnScreenControls };
+})();
+
 // ---------- Game ----------
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
@@ -474,6 +673,8 @@ const Game = (() => {
     rafId = requestAnimationFrame(loop);
     const dt = Math.min(0.05, (now - lastTime) / 1000);
     lastTime = now;
+
+    Gamepad.tick();
 
     if (state === 'playing') {
       update(dt);
@@ -1038,6 +1239,17 @@ const Game = (() => {
 // ---------- Init ----------
 refreshSettingsUI();
 showScreen('menu');
+
+// Always-on gamepad poller (runs in addition to in-game loop on menu screens).
+// Game loop also calls Gamepad.tick() during gameplay, which is fine —
+// tick() is idempotent given its own prev-state, and only the game-loop call
+// triggers when a game frame is rendering. The standalone poller covers menus.
+(function menuGamepadLoop() {
+  if (!screens.game.classList.contains('active')) {
+    Gamepad.tick();
+  }
+  requestAnimationFrame(menuGamepadLoop);
+})();
 
 // Resize canvas to fit window while preserving aspect
 function resizeCanvas() {

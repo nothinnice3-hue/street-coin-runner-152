@@ -18,12 +18,37 @@ You're a street runner. Dodge cones, cars, trash cans, and roadblocks; collect c
 
 ## Controls
 
+### Keyboard
+
 | Action | Key |
 |---|---|
 | Move left | `A` or `Left Arrow` |
 | Move right | `D` or `Right Arrow` |
 | Jump | `Space` / `W` / `Up Arrow` |
 | Pause | `P` or `Esc` |
+
+### Controller (Xbox-style)
+
+| Action | Button |
+|---|---|
+| Move left / right | D-pad or Left Stick |
+| Jump | A button |
+| Pause / Resume | Start |
+| Back (menus) | B button |
+| Confirm (menus) | A button |
+| Navigate (menus) | D-pad up / down |
+
+Plug in any standard gamepad before launching - Xbox, PlayStation, and most generic USB controllers are auto-detected via the Gamepad API.
+
+### Touch screen
+
+| Action | Gesture |
+|---|---|
+| Move left / right | Swipe left or right on the canvas, or tap the on-screen arrow buttons |
+| Jump | Tap the canvas, swipe up, or tap the on-screen jump button |
+| Pause | Tap the Pause button in the top-right HUD |
+
+On-screen touch controls auto-appear on devices with a touch screen (and after the first touch input on any device).
 
 ## Requirements
 
